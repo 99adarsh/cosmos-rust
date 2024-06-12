@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
+
 use crate::{proto, AccountId, Coin, ErrorReport, Result};
 
 /// Represents a MultiSend Input or Output
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct MultiSendIo {
     /// The address that `coins` will be sent to/from
     pub address: AccountId,

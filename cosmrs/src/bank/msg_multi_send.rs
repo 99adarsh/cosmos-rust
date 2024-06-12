@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use super::MultiSendIo;
 use crate::{proto, tx::Msg, ErrorReport, Result};
 
 /// MsgMultiSend represents an arbitrary multi-in, multi-out send message.
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct MsgMultiSend {
     /// Sender account/amount pairs.
     pub inputs: Vec<MultiSendIo>,

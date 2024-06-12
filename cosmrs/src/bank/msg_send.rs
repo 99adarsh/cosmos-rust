@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
+
 use crate::{proto, tx::Msg, AccountId, Coin, ErrorReport, Result};
 
 /// MsgSend represents a message to send coins from one account to another.
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct MsgSend {
     /// Sender's address.
     pub from_address: AccountId,
@@ -42,8 +44,8 @@ impl TryFrom<&proto::cosmos::bank::v1beta1::MsgSend> for MsgSend {
 }
 
 impl From<MsgSend> for proto::cosmos::bank::v1beta1::MsgSend {
-    fn from(coin: MsgSend) -> proto::cosmos::bank::v1beta1::MsgSend {
-        proto::cosmos::bank::v1beta1::MsgSend::from(&coin)
+    fn from(msg: MsgSend) -> proto::cosmos::bank::v1beta1::MsgSend {
+        proto::cosmos::bank::v1beta1::MsgSend::from(&msg)
     }
 }
 
