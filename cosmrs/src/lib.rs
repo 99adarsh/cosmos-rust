@@ -36,6 +36,7 @@ pub mod slashing;
 pub mod staking;
 pub mod tx;
 pub mod vesting;
+pub mod gov;
 
 #[cfg(feature = "cosmwasm")]
 pub mod cosmwasm;

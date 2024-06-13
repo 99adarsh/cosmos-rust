@@ -1,6 +1,6 @@
 //! Bank module support
 //!
-//! <https://docs.cosmos.network/master/modules/bank/>
+//! <https://docs.cosmos.network/v0.50/build/modules/bank>
 
 mod msg_multi_send;
 mod msg_send;
