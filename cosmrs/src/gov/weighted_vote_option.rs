@@ -30,6 +30,24 @@ impl TryFrom<&proto::cosmos::gov::v1::WeightedVoteOption> for WeightedVoteOption
         })
     }
 }
+impl TryFrom<proto::cosmos::gov::v1beta1::WeightedVoteOption> for WeightedVoteOption {
+    type Error = ErrorReport;
+
+    fn try_from(proto: proto::cosmos::gov::v1beta1::WeightedVoteOption) -> Result<Self> {
+        Self::try_from(&proto)
+    }
+}
+
+impl TryFrom<&proto::cosmos::gov::v1beta1::WeightedVoteOption> for WeightedVoteOption {
+    type Error = ErrorReport;
+
+    fn try_from(proto: &proto::cosmos::gov::v1beta1::WeightedVoteOption) -> Result<Self> {
+        Ok(Self {
+            option: proto.option,
+            weight: proto.weight.to_string()
+        })
+    }
+}
 
 impl From<WeightedVoteOption> for proto::cosmos::gov::v1::WeightedVoteOption {
     fn from(wtd_vote_option: WeightedVoteOption) -> proto::cosmos::gov::v1::WeightedVoteOption {
@@ -40,6 +58,21 @@ impl From<WeightedVoteOption> for proto::cosmos::gov::v1::WeightedVoteOption {
 impl From<&WeightedVoteOption> for proto::cosmos::gov::v1::WeightedVoteOption {
     fn from(wtd_vote_option: &WeightedVoteOption) -> proto::cosmos::gov::v1::WeightedVoteOption {
         proto::cosmos::gov::v1::WeightedVoteOption {
+           option: wtd_vote_option.option,
+           weight: wtd_vote_option.weight.to_string()
+        }
+    }
+}
+
+impl From<WeightedVoteOption> for proto::cosmos::gov::v1beta1::WeightedVoteOption {
+    fn from(wtd_vote_option: WeightedVoteOption) -> proto::cosmos::gov::v1beta1::WeightedVoteOption {
+        proto::cosmos::gov::v1beta1::WeightedVoteOption::from(&wtd_vote_option)
+    }
+}
+
+impl From<&WeightedVoteOption> for proto::cosmos::gov::v1beta1::WeightedVoteOption {
+    fn from(wtd_vote_option: &WeightedVoteOption) -> proto::cosmos::gov::v1beta1::WeightedVoteOption {
+        proto::cosmos::gov::v1beta1::WeightedVoteOption {
            option: wtd_vote_option.option,
            weight: wtd_vote_option.weight.to_string()
         }
