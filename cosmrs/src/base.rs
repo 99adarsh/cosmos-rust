@@ -3,6 +3,7 @@
 mod account_id;
 mod coin;
 mod denom;
+mod any;
 
 /// Query support
 pub mod query;

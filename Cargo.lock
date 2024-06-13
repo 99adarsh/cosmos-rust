@@ -282,6 +282,7 @@ dependencies = [
  "eyre",
  "hex-literal",
  "k256",
+ "prost-types",
  "rand_core",
  "serde",
  "serde_json",

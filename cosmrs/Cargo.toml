@@ -23,6 +23,7 @@ signature = { version = "2", features = ["std"] }
 subtle-encoding = { version = "0.5", features = ["bech32-preview"] }
 tendermint = { version = "0.37", features = ["secp256k1"] }
 thiserror = "1"
+prost-types = "0.12"
 
 # optional dependencies
 bip32 = { version = "0.5", optional = true, default-features = false, features = ["alloc", "secp256k1"] }
