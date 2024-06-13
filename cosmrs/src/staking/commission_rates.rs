@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::proto;
 
 /// CommissionRates defines the initial commission rates to be used for creating
 /// a validator.
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct CommissionRates {
     /// rate is the commission rate charged to delegators, as a fraction.
     pub rate: String,

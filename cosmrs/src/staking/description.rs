@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
+
 use crate::proto;
 
 /// Description defines a validator description.
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Description {
     /// moniker defines a human-readable name for the validator.
     pub moniker: String,

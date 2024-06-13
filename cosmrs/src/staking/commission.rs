@@ -1,10 +1,11 @@
 use crate::staking::CommissionRates;
 use crate::{proto, ErrorReport, Result};
 use cosmos_sdk_proto::Timestamp;
+use serde::{Deserialize, Serialize};
 use tendermint::Time;
 
 /// Commission defines commission parameters for a given validator.
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Commission {
     /// commission_rates defines the initial commission rates to be used for creating a validator.
     pub commission_rates: Option<CommissionRates>,
