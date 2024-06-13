@@ -47,7 +47,7 @@ mod base;
 mod error;
 
 pub use crate::{
-    base::{query, AccountId, Amount, Coin, Denom, Gas},
+    base::{query, AccountId, Amount, Coin, Denom, Gas, Any as AnyWrapper},
     error::{Error, Result},
     tx::Tx,
 };

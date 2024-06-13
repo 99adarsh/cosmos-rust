@@ -3,13 +3,17 @@ use std::fmt;
 use crate::{ErrorReport, Result};
 use serde::{Deserialize, Serialize};
 
+/// This is a wrapper for proto any, with serialize and deserialize implementations
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 pub struct Any {
+    /// type url for any type
     pub type_url: String,
+    /// proto encoded value for type_url type
     pub value: Vec<u8>,
 }
 
 impl Any {
+    /// constructor
     pub fn new(type_url: String, value: Vec<u8>) -> Self {
         Self { type_url, value }
     }
