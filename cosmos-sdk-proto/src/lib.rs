@@ -340,3 +340,15 @@ pub mod ibc {
 pub mod ics23 {
     include!("prost/ibc-go/ics23.rs");
 }
+
+pub mod noble {
+    pub mod tariff {
+        include!("prost/noble/noble.tariff.rs");
+    }
+    pub mod globalfee {
+        include!("prost/noble/noble.globalfee.rs");
+    }
+    pub mod tokenfactory {
+        include!("prost/noble/noble.tokenfactory.rs");
+    }
+}
