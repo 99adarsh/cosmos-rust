@@ -10,3 +10,9 @@
 [submodule "noble"]
 	path = noble
 	url = https://github.com/noble-assets/noble.git
+[submodule "fiattokenfactory"]
+	path = fiattokenfactory
+	url = https://github.com/noble-assets/fiattokenfactory.git
+[submodule "noble-cctp"]
+	path = noble-cctp
+	url = https://github.com/circlefin/noble-cctp.git

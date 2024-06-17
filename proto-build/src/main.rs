@@ -3,8 +3,7 @@
 //! proto files for further compilation. This is based on the proto-compiler code
 //! in github.com/informalsystems/ibc-rs
 
-
-// ASSUMPTION: Assuming that any upgradded version will ave the old module version proto 
+// ASSUMPTION: Assuming that any upgradded version will ave the old module version proto
 use regex::Regex;
 use std::{
     env,
@@ -33,6 +32,8 @@ const WASMD_REV: &str = "v0.29.2";
 /// The Noble chain tag to be cloned and used to build the proto files
 /// All the modules other than cosmos sdk modules will be inside noble chain dir among proto files
 const NOBLE_REV: &str = "v4.1.3";
+const NOBLE_CCTP_REV: &str = "release-2024-05-10T135707";
+const NOBLE_FIATTOKENFACTORY_REV: &str = "738932cb316d06f587c49dfb11a50515cce657d9";
 
 // All paths must end with a / and either be absolute or include a ./ to reference the current
 // working directory.
@@ -47,6 +48,8 @@ const IBC_DIR: &str = "../ibc-go";
 const WASMD_DIR: &str = "../wasmd";
 /// Directory where the submodule is located
 const NOBLE_DIR: &str = "../noble";
+const NOBLE_CCTP_DIR: &str = "../noble-cctp";
+const NOBLE_FIATTOKENFACTORY_DIR: &str = "../fiattokenfactory";
 /// A temporary directory for proto building
 const TMP_BUILD_DIR: &str = "/tmp/tmp-protobuf/";
 
@@ -85,31 +88,43 @@ fn main() {
     let temp_ibc_dir = tmp_build_dir.join("ibc-go");
     let temp_wasmd_dir = tmp_build_dir.join("wasmd");
     let temp_noble_dir = tmp_build_dir.join("noble");
+    let temp_noble_fiattokenfactory_dir = tmp_build_dir.join("fiattokenfactory");
+    let temp_noble_cctp_dir = tmp_build_dir.join("noble-cctp");
 
     fs::create_dir_all(&temp_sdk_dir).unwrap();
     fs::create_dir_all(&temp_ibc_dir).unwrap();
     fs::create_dir_all(&temp_wasmd_dir).unwrap();
     fs::create_dir_all(&temp_noble_dir).unwrap();
+    fs::create_dir_all(&temp_noble_fiattokenfactory_dir).unwrap();
+    fs::create_dir_all(&temp_noble_cctp_dir).unwrap();
 
     // update the submodule and reset to the specified commit
     update_submodules();
 
-    // create a File with directory name and write the version of the submodule it used tyo create the proto-file 
+    // create a File with directory name and write the version of the submodule it used tyo create the proto-file
     output_sdk_version(&temp_sdk_dir);
     output_ibc_version(&temp_ibc_dir);
     output_wasmd_version(&temp_wasmd_dir);
     output_noble_version(&temp_noble_dir);
-
+    output_noble_fiattokenfactory_version(&temp_noble_fiattokenfactory_dir);
+    output_noble_cctp_version(&temp_noble_cctp_dir);
 
     compile_sdk_protos_and_services(&temp_sdk_dir);
     compile_wasmd_proto_and_services(&temp_wasmd_dir);
     compile_ibc_protos_and_services(&temp_ibc_dir);
     compile_noble_proto_and_service(&temp_noble_dir);
+    compile_noble_fiattokenfactory_module_proto_and_service(&temp_noble_fiattokenfactory_dir);
+    compile_noble_cctp_module_proto_and_service(&temp_noble_cctp_dir);
 
     copy_generated_files(&temp_sdk_dir, &proto_dir.join("cosmos-sdk"));
     copy_generated_files(&temp_ibc_dir, &proto_dir.join("ibc-go"));
     copy_generated_files(&temp_wasmd_dir, &proto_dir.join("wasmd"));
     copy_generated_files(&temp_noble_dir, &proto_dir.join("noble"));
+    copy_generated_files(
+        &temp_noble_fiattokenfactory_dir,
+        &proto_dir.join("noble-fiattokenfactory"),
+    );
+    copy_generated_files(&temp_noble_cctp_dir, &proto_dir.join("noble-cctp"));
 
     apply_patches(&proto_dir);
 
@@ -118,8 +133,8 @@ fn main() {
 
     if is_github() {
         println!(
-            "Rebuild protos with proto-build (cosmos-sdk rev: {} ibc-go rev: {} wasmd rev: {} noble rev: {}))",
-            COSMOS_SDK_REV, IBC_REV, WASMD_REV, NOBLE_REV
+            "Rebuild protos with proto-build (cosmos-sdk rev: {} ibc-go rev: {} wasmd rev: {} noble rev: {} noble fiattokenfactory rev: {}))",
+            COSMOS_SDK_REV, IBC_REV, WASMD_REV, NOBLE_REV, NOBLE_FIATTOKENFACTORY_REV
         );
     }
 }
@@ -202,7 +217,7 @@ fn run_rustfmt(dir: &Path) {
     run_cmd("rustfmt", args);
 }
 
-/// Not using recurse in updateing and init because most if the chains does not have any submodules in it, 
+/// Not using recurse in updateing and init because most if the chains does not have any submodules in it,
 /// TODO: Check repo for any submodules before adding it
 fn update_submodules() {
     info!("Updating cosmos/cosmos-sdk submodule...");
@@ -221,11 +236,31 @@ fn update_submodules() {
     run_git(["-C", WASMD_DIR, "reset", "--hard", WASMD_REV]);
 
     info!("Updating noble-chain submodules..");
-    // -C is used for executiong this git command int he specified directory
+    // -C is used for executiong this git command in the specified directory
     // reset to the latest version of noble chain
     run_git(["submodule", "update", "--init"]);
     run_git(["-C", NOBLE_DIR, "fetch"]);
     run_git(["-C", NOBLE_DIR, "reset", "--hard", NOBLE_REV]);
+
+    info!("Updating noble-chain fiattokenfactory module submodules..");
+    // -C is used for executiong this git command in the specified directory
+    // reset to the latest version of noble chain
+    run_git(["submodule", "update", "--init"]);
+    run_git(["-C", NOBLE_FIATTOKENFACTORY_DIR, "fetch"]);
+    run_git([
+        "-C",
+        NOBLE_FIATTOKENFACTORY_DIR,
+        "reset",
+        "--hard",
+        NOBLE_FIATTOKENFACTORY_REV,
+    ]);
+
+    info!("Updating noble-chain cctp module submodules..");
+    // -C is used for executiong this git command in the specified directory
+    // reset to the latest version of noble chain
+    run_git(["submodule", "update", "--init"]);
+    run_git(["-C", NOBLE_CCTP_DIR, "fetch"]);
+    run_git(["-C", NOBLE_CCTP_DIR, "reset", "--hard", NOBLE_CCTP_REV]);
 }
 
 fn output_sdk_version(out_dir: &Path) {
@@ -247,6 +282,18 @@ fn output_wasmd_version(out_dir: &Path) {
 fn output_noble_version(out_dir: &Path) {
     let path = out_dir.join("NOBLE_COMMIT");
     fs::write(path, NOBLE_REV).unwrap();
+}
+
+// noble chain fiattokenfactory module version
+fn output_noble_fiattokenfactory_version(out_dir: &Path) {
+    let path = out_dir.join("NOBLE_FIATTOKENFACTORY_COMMIT");
+    fs::write(path, NOBLE_FIATTOKENFACTORY_REV).unwrap();
+}
+
+// noble chain cctp module version
+fn output_noble_cctp_version(out_dir: &Path) {
+    let path = out_dir.join("NOBLE_CCTP_COMMIT");
+    fs::write(path, NOBLE_CCTP_REV).unwrap();
 }
 
 fn compile_sdk_protos_and_services(out_dir: &Path) {
@@ -284,7 +331,7 @@ fn compile_noble_proto_and_service(out_dir: &Path) {
     let proto_paths = [
         format!("{}/proto/globalfee", noble_dir.display()),
         format!("{}/proto/tariff", noble_dir.display()),
-        format!("{}/proto/tokenfactory", noble_dir.display())
+        format!("{}/proto/tokenfactory", noble_dir.display()),
     ];
 
     // List available proto files
@@ -292,7 +339,40 @@ fn compile_noble_proto_and_service(out_dir: &Path) {
     collect_protos(&proto_paths, &mut protos);
 
     // Compile all proto client for GRPC services
-    info!("Compiling wasmd proto clients for GRPC services!");
+    info!("Compiling noble proto clients for GRPC services!");
+    run_buf("buf.noble.gen.yaml", proto_path, out_dir);
+    info!("=> Done!");
+}
+
+fn compile_noble_fiattokenfactory_module_proto_and_service(out_dir: &Path) {
+    let fiattokenfactory_dir = Path::new(NOBLE_FIATTOKENFACTORY_DIR);
+    let proto_path = fiattokenfactory_dir.join("proto");
+    let proto_paths = [format!(
+        "{}/proto/fiattokenfactory",
+        fiattokenfactory_dir.display()
+    )];
+
+    // List available proto files
+    let mut protos: Vec<PathBuf> = vec![];
+    collect_protos(&proto_paths, &mut protos);
+
+    // Compile all proto client for GRPC services
+    info!("Compiling noble's fiattokenfactory module proto clients for GRPC services!");
+    run_buf("buf.noble.gen.yaml", proto_path, out_dir);
+    info!("=> Done!");
+}
+
+fn compile_noble_cctp_module_proto_and_service(out_dir: &Path) {
+    let cctp_dir = Path::new(NOBLE_CCTP_DIR);
+    let proto_path = cctp_dir.join("proto");
+    let proto_paths = [format!("{}/proto/circle/cctp/v1", cctp_dir.display())];
+
+    // List available proto files
+    let mut protos: Vec<PathBuf> = vec![];
+    collect_protos(&proto_paths, &mut protos);
+
+    // Compile all proto client for GRPC services
+    info!("Compiling noble's cctp module proto clients for GRPC services!");
     run_buf("buf.noble.gen.yaml", proto_path, out_dir);
     info!("=> Done!");
 }
@@ -305,7 +385,7 @@ fn compile_ibc_protos_and_services(out_dir: &Path) {
 
     let root = env!("CARGO_MANIFEST_DIR");
     info!(format!("Root dir: {root}"));
-    
+
     let ibc_dir = Path::new(IBC_DIR);
 
     let proto_includes_paths = [
