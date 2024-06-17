@@ -344,11 +344,20 @@ pub mod ics23 {
 pub mod noble {
     pub mod tariff {
         include!("prost/noble/noble.tariff.rs");
-    }
+    }   
     pub mod globalfee {
         include!("prost/noble/noble.globalfee.rs");
     }
     pub mod tokenfactory {
         include!("prost/noble/noble.tokenfactory.rs");
     }
+    pub mod fiattokenfactory {
+        include!("prost/noble-fiattokenfactory/noble.fiattokenfactory.rs");
+    }
+    pub mod modules {
+        pub mod cctp {
+            include!("prost/noble-cctp/circle.cctp.v1.rs");
+        }
+    }
 }
+
