@@ -16,3 +16,6 @@
 [submodule "noble-cctp"]
 	path = noble-cctp
 	url = https://github.com/circlefin/noble-cctp.git
+[submodule "forwarding"]
+	path = forwarding
+	url = https://github.com/noble-assets/forwarding.git

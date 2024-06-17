@@ -34,6 +34,7 @@ const WASMD_REV: &str = "v0.29.2";
 const NOBLE_REV: &str = "v4.1.3";
 const NOBLE_CCTP_REV: &str = "release-2024-05-10T135707";
 const NOBLE_FIATTOKENFACTORY_REV: &str = "738932cb316d06f587c49dfb11a50515cce657d9";
+const NOBLE_FORWARDING_REV: &str = "v1.1.0";
 
 // All paths must end with a / and either be absolute or include a ./ to reference the current
 // working directory.
@@ -50,6 +51,7 @@ const WASMD_DIR: &str = "../wasmd";
 const NOBLE_DIR: &str = "../noble";
 const NOBLE_CCTP_DIR: &str = "../noble-cctp";
 const NOBLE_FIATTOKENFACTORY_DIR: &str = "../fiattokenfactory";
+const NOBLE_FORWARDING_DIR: &str = "../forwarding";
 /// A temporary directory for proto building
 const TMP_BUILD_DIR: &str = "/tmp/tmp-protobuf/";
 
@@ -90,6 +92,7 @@ fn main() {
     let temp_noble_dir = tmp_build_dir.join("noble");
     let temp_noble_fiattokenfactory_dir = tmp_build_dir.join("fiattokenfactory");
     let temp_noble_cctp_dir = tmp_build_dir.join("noble-cctp");
+    let temp_noble_forwarding_dir = tmp_build_dir.join("forwarding");
 
     fs::create_dir_all(&temp_sdk_dir).unwrap();
     fs::create_dir_all(&temp_ibc_dir).unwrap();
@@ -97,6 +100,7 @@ fn main() {
     fs::create_dir_all(&temp_noble_dir).unwrap();
     fs::create_dir_all(&temp_noble_fiattokenfactory_dir).unwrap();
     fs::create_dir_all(&temp_noble_cctp_dir).unwrap();
+    fs::create_dir_all(&temp_noble_forwarding_dir).unwrap();
 
     // update the submodule and reset to the specified commit
     update_submodules();
@@ -108,6 +112,7 @@ fn main() {
     output_noble_version(&temp_noble_dir);
     output_noble_fiattokenfactory_version(&temp_noble_fiattokenfactory_dir);
     output_noble_cctp_version(&temp_noble_cctp_dir);
+    output_noble_forwarding_version(&temp_noble_forwarding_dir);
 
     compile_sdk_protos_and_services(&temp_sdk_dir);
     compile_wasmd_proto_and_services(&temp_wasmd_dir);
@@ -115,6 +120,7 @@ fn main() {
     compile_noble_proto_and_service(&temp_noble_dir);
     compile_noble_fiattokenfactory_module_proto_and_service(&temp_noble_fiattokenfactory_dir);
     compile_noble_cctp_module_proto_and_service(&temp_noble_cctp_dir);
+    compile_noble_forwarding_module_proto_and_service(&temp_noble_forwarding_dir);
 
     copy_generated_files(&temp_sdk_dir, &proto_dir.join("cosmos-sdk"));
     copy_generated_files(&temp_ibc_dir, &proto_dir.join("ibc-go"));
@@ -125,6 +131,10 @@ fn main() {
         &proto_dir.join("noble-fiattokenfactory"),
     );
     copy_generated_files(&temp_noble_cctp_dir, &proto_dir.join("noble-cctp"));
+    copy_generated_files(
+        &temp_noble_forwarding_dir,
+        &proto_dir.join("noble-forwarding"),
+    );
 
     apply_patches(&proto_dir);
 
@@ -133,8 +143,8 @@ fn main() {
 
     if is_github() {
         println!(
-            "Rebuild protos with proto-build (cosmos-sdk rev: {} ibc-go rev: {} wasmd rev: {} noble rev: {} noble fiattokenfactory rev: {}))",
-            COSMOS_SDK_REV, IBC_REV, WASMD_REV, NOBLE_REV, NOBLE_FIATTOKENFACTORY_REV
+            "Rebuild protos with proto-build (cosmos-sdk rev: {} ibc-go rev: {} wasmd rev: {} noble rev: {} noble fiattokenfactory rev: {} noble cctp rev: {} noble forwarding rev: {}))",
+            COSMOS_SDK_REV, IBC_REV, WASMD_REV, NOBLE_REV, NOBLE_FIATTOKENFACTORY_REV, NOBLE_CCTP_REV, NOBLE_FORWARDING_REV
         );
     }
 }
@@ -243,8 +253,6 @@ fn update_submodules() {
     run_git(["-C", NOBLE_DIR, "reset", "--hard", NOBLE_REV]);
 
     info!("Updating noble-chain fiattokenfactory module submodules..");
-    // -C is used for executiong this git command in the specified directory
-    // reset to the latest version of noble chain
     run_git(["submodule", "update", "--init"]);
     run_git(["-C", NOBLE_FIATTOKENFACTORY_DIR, "fetch"]);
     run_git([
@@ -256,11 +264,20 @@ fn update_submodules() {
     ]);
 
     info!("Updating noble-chain cctp module submodules..");
-    // -C is used for executiong this git command in the specified directory
-    // reset to the latest version of noble chain
     run_git(["submodule", "update", "--init"]);
     run_git(["-C", NOBLE_CCTP_DIR, "fetch"]);
     run_git(["-C", NOBLE_CCTP_DIR, "reset", "--hard", NOBLE_CCTP_REV]);
+
+    info!("Updating noble-chain forwarding module submodules..");
+    run_git(["submodule", "update", "--init"]);
+    run_git(["-C", NOBLE_FORWARDING_DIR, "fetch"]);
+    run_git([
+        "-C",
+        NOBLE_FORWARDING_DIR,
+        "reset",
+        "--hard",
+        NOBLE_FORWARDING_REV,
+    ]);
 }
 
 fn output_sdk_version(out_dir: &Path) {
@@ -294,6 +311,12 @@ fn output_noble_fiattokenfactory_version(out_dir: &Path) {
 fn output_noble_cctp_version(out_dir: &Path) {
     let path = out_dir.join("NOBLE_CCTP_COMMIT");
     fs::write(path, NOBLE_CCTP_REV).unwrap();
+}
+
+// noble chain forwarding module version
+fn output_noble_forwarding_version(out_dir: &Path) {
+    let path = out_dir.join("NOBLE_FORWARDING_COMMIT");
+    fs::write(path, NOBLE_FORWARDING_REV).unwrap();
 }
 
 fn compile_sdk_protos_and_services(out_dir: &Path) {
@@ -373,6 +396,24 @@ fn compile_noble_cctp_module_proto_and_service(out_dir: &Path) {
 
     // Compile all proto client for GRPC services
     info!("Compiling noble's cctp module proto clients for GRPC services!");
+    run_buf("buf.noble.gen.yaml", proto_path, out_dir);
+    info!("=> Done!");
+}
+
+fn compile_noble_forwarding_module_proto_and_service(out_dir: &Path) {
+    let forwarding_dir = Path::new(NOBLE_FORWARDING_DIR);
+    let proto_path = forwarding_dir.join("proto");
+    let proto_paths = [format!(
+        "{}/proto/noble/forwarding/v1",
+        forwarding_dir.display()
+    )];
+
+    // List available proto files
+    let mut protos: Vec<PathBuf> = vec![];
+    collect_protos(&proto_paths, &mut protos);
+
+    // Compile all proto client for GRPC services
+    info!("Compiling noble's forwarding module proto clients for GRPC services!");
     run_buf("buf.noble.gen.yaml", proto_path, out_dir);
     info!("=> Done!");
 }

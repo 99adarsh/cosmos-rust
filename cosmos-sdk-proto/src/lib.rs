@@ -358,6 +358,9 @@ pub mod noble {
         pub mod cctp {
             include!("prost/noble-cctp/circle.cctp.v1.rs");
         }
+        pub mod forwarding {
+            include!("prost/noble-forwarding/noble.forwarding.v1.rs");
+        }
     }
 }
 
